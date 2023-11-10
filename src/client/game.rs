@@ -1,7 +1,8 @@
-use super::state::State;
+use hecs::World;
 
-pub fn step(state: &mut State) {
-    for (_, player) in state.players.iter_mut() {
-        player.step();
-    }
+use super::{state::State, systems};
+
+pub fn step(ecs: &mut World, state: &mut State) {
+    systems::controlling::control_player(ecs, state);
+    systems::physics::step_physics(ecs, state);
 }

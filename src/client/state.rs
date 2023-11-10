@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-
-use crate::common::game_objects::Player;
+use super::event_processing::PlayingInputs;
 
 pub struct State {
     pub running: bool,
     pub time_since_last_update: f32,
-    pub client_id: Option<u32>,
-    pub players: HashMap<u32, Player>,
+    // pub client_id: Option<u32>,
+    pub players: Vec<u32>,
+
+    pub playing_inputs: PlayingInputs,
 }
 
 impl State {
@@ -14,8 +14,10 @@ impl State {
         Self {
             running: true,
             time_since_last_update: 0.0,
-            client_id: None,
-            players: HashMap::new(),
+
+            players: Vec::new(),
+
+            playing_inputs: PlayingInputs::new(),
         }
     }
 }

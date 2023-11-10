@@ -4,3 +4,4 @@
     (example: old player position coming in from 10 seconds ago causing you to teleport backwards then forwards)
 
 - last message rcv time from server, with warning things probably
+- have a close everything message on the client so that all the awaits close

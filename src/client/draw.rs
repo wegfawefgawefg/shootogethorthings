@@ -1,14 +1,26 @@
-use raylib::prelude::*;
+use hecs::World;
+use raylib::prelude::{Color, RaylibDraw, RaylibDrawHandle, RaylibTextureMode};
 
-use super::state::State;
+use super::{
+    components::{Shape, Transform},
+    state::State,
+};
 
-pub fn draw(state: &State, d: &mut RaylibTextureMode<RaylibDrawHandle>) {
+pub fn draw(ecs: &World, state: &State, d: &mut RaylibTextureMode<RaylibDrawHandle>) {
     d.draw_text("Multiplayer!", 12, 12, 12, Color::WHITE);
     let mouse_pos = d.get_mouse_position();
     d.draw_circle(mouse_pos.x as i32, mouse_pos.y as i32, 6.0, Color::GREEN);
 
-    // render all players
-    for (_, player) in state.players.iter() {
-        d.draw_circle(player.pos.x as i32, player.pos.y as i32, 6.0, Color::BLUE);
+    draw_players(ecs, state, d);
+}
+
+pub fn draw_players(ecs: &World, state: &State, d: &mut RaylibTextureMode<RaylibDrawHandle>) {
+    for (_, (transform, shape)) in ecs.query::<(&Transform, &Shape)>().iter() {
+        d.draw_circle(
+            transform.pos.x as i32,
+            transform.pos.y as i32,
+            shape.dims.x as f32,
+            Color::BLUE,
+        );
     }
 }

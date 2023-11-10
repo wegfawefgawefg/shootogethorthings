@@ -5,8 +5,9 @@ use crate::{
         client_to_server::ClientToServerMessageData, game_objects::Player,
         server_to_client::ServerToClientMessage,
     },
-    server::enque_outbound_messages::{
-        broadcast_to_all, broadcast_to_all_except, send_to_one_client,
+    server::{
+        client_bookkeeping::CLIENT_ID_TO_SOCKET_ADDRESS,
+        enque_outbound_messages::{broadcast_to_all, broadcast_to_all_except, send_to_one_client},
     },
 };
 
@@ -65,7 +66,6 @@ pub async fn process_message_queue(state: &mut State) {
                 let outbound_message = ServerToClientMessage::SpawnPlayer {
                     owner_client_id: client_id,
                     entity_id: eid,
-                    pos: Vec2::ZERO,
                 };
                 broadcast_to_all(outbound_message).await;
             }
@@ -77,13 +77,33 @@ pub async fn process_message_queue(state: &mut State) {
                 let outbound_message = ServerToClientMessage::EntityPosition { entity_id, pos };
                 broadcast_to_all_except(client_id, outbound_message).await;
             }
-            ClientToServerMessageData::RequestAllPlayers => {
-                println!("{} requested all players", client_id);
+            ClientToServerMessageData::RequestAllEntities => {
+                println!("{} requested full ecs state", client_id);
 
-                let players = state.players.values().cloned().collect();
-
-                let outbound_message = ServerToClientMessage::AllPlayers { players };
-                send_to_one_client(client_id, outbound_message).await;
+                // see if theres any other players to request world state from,
+                {
+                    let mut chosen_one: Option<u32> = None;
+                    let client_id_to_socket_address_read = CLIENT_ID_TO_SOCKET_ADDRESS.read().await;
+                    let client_ids = client_id_to_socket_address_read
+                        .keys()
+                        .cloned()
+                        .collect::<Vec<_>>();
+                    for a_client_id in client_ids.iter() {
+                        if *a_client_id != client_id {
+                            chosen_one = Some(*a_client_id);
+                            break;
+                        }
+                    }
+                    if let Some(chosen_one) = chosen_one {
+                        send_to_one_client(
+                            chosen_one,
+                            ServerToClientMessage::RequestAllEntitiesFor {
+                                for_client_id: client_id,
+                            },
+                        )
+                        .await;
+                    }
+                }
             }
         }
     }

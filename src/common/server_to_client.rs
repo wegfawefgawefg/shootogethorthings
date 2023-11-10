@@ -24,7 +24,6 @@ pub enum ServerToClientMessage {
     SpawnPlayer {
         owner_client_id: u32,
         entity_id: u32,
-        pos: Vec2,
     },
     EntityPosition {
         entity_id: u32,
@@ -32,5 +31,8 @@ pub enum ServerToClientMessage {
     },
     AllPlayers {
         players: Vec<Player>,
+    },
+    RequestAllEntitiesFor {
+        for_client_id: u32,
     },
 }

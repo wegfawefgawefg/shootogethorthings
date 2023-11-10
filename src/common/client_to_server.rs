@@ -44,8 +44,19 @@ impl ClientToServerMessage {
 pub enum ClientToServerMessageData {
     Connect,
     Disconnect,
-    ChatMessage { message: String },
+    ChatMessage {
+        message: String,
+    },
     RequestToSpawnPlayer,
-    RequestAllPlayers,
-    EntityPosition { entity_id: u32, pos: glam::Vec2 },
+    RequestAllEntities {
+        from_client_id: u32,
+    },
+    EntityPosition {
+        entity_id: u32,
+        pos: glam::Vec2,
+    },
+    AllTheEntitiesFor {
+        client_id: u32,
+        entities: Vec<crate::common::game_objects::Entity>,
+    },
 }
