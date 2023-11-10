@@ -1,10 +1,6 @@
-use std::{collections::HashMap, time::Instant};
+use std::time::Instant;
 
-use crate::common::client_to_server::{ClientToServerMessage, ClientToServerMessageData};
-
-use super::{
-    message_processing::process_message_queue, state::State, udp_networking::INCOMING_MESSAGE_QUEUE,
-};
+use super::{message_processing::process_message_queue, state::State};
 
 pub const FRAMES_PER_SECOND: u32 = 60;
 const TIMESTEP: f32 = 1.0 / FRAMES_PER_SECOND as f32;
