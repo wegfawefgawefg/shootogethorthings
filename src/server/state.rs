@@ -1,6 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
-
-use tokio::{net::TcpStream, sync::Mutex};
+use std::collections::HashMap;
 
 use crate::common::game_objects::Player;
 
@@ -9,7 +7,6 @@ pub struct State {
     pub next_id: u32,
     pub next_eid: u32,
     pub players: HashMap<u32, Player>,
-    pub clients: HashMap<u32, Arc<Mutex<TcpStream>>>,
 }
 
 impl State {
@@ -19,15 +16,8 @@ impl State {
             next_id: 0,
             next_eid: 0,
             players: HashMap::new(),
-            clients: HashMap::new(),
         }
     }
-
-    // pub fn print_state(&self) {
-    //     for (id, player) in self.players.iter() {
-    //         println!("Player {}: pos: {}, vel: {}", id, player.pos, player.vel);
-    //     }
-    // }
 }
 
 impl Default for State {

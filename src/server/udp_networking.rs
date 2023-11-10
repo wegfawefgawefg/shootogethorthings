@@ -17,10 +17,7 @@ use super::{
     settings::SERVER_ADDR,
 };
 use crate::{
-    common::{
-        client_to_server::{ClientToServerMessage, ClientToServerMessageBundle},
-        server_to_client::ServerToClientMessage,
-    },
+    common::client_to_server::{ClientToServerMessage, ClientToServerMessageBundle},
     server::client_bookkeeping::{add_client, SOCKET_ADDRESS_TO_CLIENT_ID},
 };
 
@@ -64,10 +61,7 @@ pub async fn continuously_read_any_inbound_messages(socket: Arc<UdpSocket>) -> i
         let result: Result<ClientToServerMessage, _> = bincode::deserialize(&buffer[..nbytes]);
         match result {
             Ok(result) => {
-                let message_bundle = ClientToServerMessageBundle {
-                    client_id,
-                    message: result,
-                };
+                let message_bundle = ClientToServerMessageBundle::new(client_id, result);
                 if INCOMING_MESSAGE_QUEUE.push(message_bundle).is_err() {
                     eprintln!(
                         "Inbound message queue full: dropping message from {}",

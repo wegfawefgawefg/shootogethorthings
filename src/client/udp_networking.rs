@@ -5,9 +5,9 @@ use crossbeam::queue::ArrayQueue;
 use tokio::io::{self};
 use tokio::net::UdpSocket;
 
-const SERVER_ADDR: &str = "127.0.0.1:8080";
 use lazy_static::lazy_static;
 
+use crate::client::settings;
 use crate::common::client_to_server::ClientToServerMessage;
 use crate::common::server_to_client::ServerToClientMessage;
 
@@ -20,14 +20,12 @@ lazy_static! {
     pub static ref CLIENT_ID: Arc<AtomicU32> = Arc::new(AtomicU32::new(0));
 }
 
-pub async fn disconnect_from_server() {}
-
 ////////////////////////    CLIENT RX/TX TASKS    ////////////////////////
 
 pub async fn init_connection() -> tokio::io::Result<()> {
     println!("connecting");
     let socket = UdpSocket::bind("0.0.0.0:0").await?;
-    socket.connect(SERVER_ADDR).await?;
+    socket.connect(settings::SERVER_ADDR).await?;
 
     println!("connected");
     let a_socket = Arc::new(socket);
@@ -60,12 +58,6 @@ pub async fn receive_incoming_messages(socket: Arc<UdpSocket>) -> io::Result<()>
 
 pub async fn transmit_outbound_messages(socket: Arc<UdpSocket>) -> io::Result<()> {
     loop {
-        // check for disconnect message from rx task
-        if SERVER_DISCONNECTED.load(Ordering::SeqCst) {
-            disconnect_from_server().await; // TODO: implement cleanup
-            return Ok(());
-        }
-
         // transmit any outbound messages
         if let Some(message) = OUTBOUND_MESSAGE_QUEUE.pop() {
             println!("Sending message: {:?}", message);

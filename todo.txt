@@ -1,0 +1,6 @@
+- add more metadata, timestamps, step count
+
+- maybe add order checking for certain types of messages which could go stale, or be out of draw_text
+    (example: old player position coming in from 10 seconds ago causing you to teleport backwards then forwards)
+
+- last message rcv time from server, with warning things probably
