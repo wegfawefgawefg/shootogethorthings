@@ -1,4 +1,3 @@
-use glam::Vec2;
 use glam::{IVec2, UVec2};
 use raylib::ffi::SetTraceLogLevel;
 use raylib::prelude::*;
@@ -12,7 +11,7 @@ pub const WINDOW_DIMS: UVec2 = UVec2::new(500, 500);
 pub const FULLSCREEN: bool = false;
 
 pub fn init_graphics() -> (RaylibHandle, RaylibThread, RenderTexture2D) {
-    let (mut rl, mut rlt) = raylib::init().title("raylib-rs-lowres-template").build();
+    let (mut rl, rlt) = raylib::init().title("raylib-rs-lowres-template").build();
     unsafe {
         SetTraceLogLevel(TraceLogLevel::LOG_WARNING as i32);
     }
@@ -27,7 +26,7 @@ pub fn init_graphics() -> (RaylibHandle, RaylibThread, RenderTexture2D) {
     let mouse_scale = DIMS.as_vec2() / WINDOW_DIMS.as_vec2();
     rl.set_mouse_scale(mouse_scale.x, mouse_scale.y);
 
-    let mut render_texture = rl
+    let render_texture = rl
         .load_render_texture(&rlt, DIMS.x, DIMS.y)
         .unwrap_or_else(|e| {
             println!("Error creating render texture: {}", e);
@@ -84,11 +83,11 @@ pub fn render(
     render_texture: &mut RenderTexture2D,
     state: &State,
 ) {
-    let mut draw_handle = rl.begin_drawing(&rlt);
+    let mut draw_handle = rl.begin_drawing(rlt);
     {
-        let low_res_draw_handle = &mut draw_handle.begin_texture_mode(&rlt, render_texture);
+        let low_res_draw_handle = &mut draw_handle.begin_texture_mode(rlt, render_texture);
         low_res_draw_handle.clear_background(Color::BLACK);
-        draw(&state, low_res_draw_handle);
+        draw(state, low_res_draw_handle);
     }
     scale_and_blit_render_texture_to_window(&mut draw_handle, render_texture);
 }

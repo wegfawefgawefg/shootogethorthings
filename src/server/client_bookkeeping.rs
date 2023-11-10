@@ -13,7 +13,9 @@ use tokio::sync::RwLock;
 
 use crate::{
     common::{
-        client_to_server::{ClientToServerMessage, ClientToServerMessageBundle},
+        client_to_server::{
+            ClientToServerMessage, ClientToServerMessageBundle, ClientToServerMessageData,
+        },
         server_to_client::ServerToClientMessage,
     },
     server::udp_networking::{CLIENT_DISCONNECTED, INCOMING_MESSAGE_QUEUE},
@@ -68,10 +70,10 @@ pub async fn add_client(socket_address: SocketAddr) -> u32 {
 
     // announce that theres a new connection
     {
-        let to_self_message = ClientToServerMessageBundle {
-            client_id: id,
-            message: ClientToServerMessage::Connect,
-        };
+        let to_self_message = ClientToServerMessageBundle::new(
+            id,
+            ClientToServerMessage::new(ClientToServerMessageData::Connect),
+        );
         if INCOMING_MESSAGE_QUEUE.push(to_self_message).is_err() {
             eprintln!(
                 "Inbound message queue full: dropping disconnect message from {}",

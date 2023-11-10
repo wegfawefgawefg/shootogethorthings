@@ -9,7 +9,7 @@ pub fn process_events_and_input(rl: &mut RaylibHandle, state: &mut State) {
         state.running = false;
     }
 
-    for (eid, mut player) in &mut state.players {
+    for player in state.players.values_mut() {
         if let Some(client_id) = state.client_id {
             if player.owner_client_id != client_id {
                 continue;

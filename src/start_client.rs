@@ -1,10 +1,7 @@
-use common::client_to_server::ClientToServerMessage;
-use raylib::prelude::*;
+use common::client_to_server::{ClientToServerMessage, ClientToServerMessageData};
 
 use client::{
-    event_processing::process_events_and_input,
-    game::process_message_queue,
-    graphics::{scale_and_blit_render_texture_to_window, FULLSCREEN, WINDOW_DIMS},
+    event_processing::process_events_and_input, message_processing::process_message_queue,
     state::State,
 };
 mod client;
@@ -16,12 +13,6 @@ const TIMESTEP: f32 = 1.0 / FRAMES_PER_SECOND as f32;
 
 const POSITION_TRANSMIT_FREQUENCY: u32 = 1;
 
-#[derive(PartialEq, Eq)]
-enum Bool {
-    True,
-    False,
-}
-
 #[tokio::main]
 async fn main() -> tokio::io::Result<()> {
     let result = client::udp_networking::init_connection().await;
@@ -32,7 +23,9 @@ async fn main() -> tokio::io::Result<()> {
 
     // request a new player
     if client::udp_networking::OUTBOUND_MESSAGE_QUEUE
-        .push(ClientToServerMessage::RequestToSpawnPlayer)
+        .push(ClientToServerMessage::new(
+            ClientToServerMessageData::RequestToSpawnPlayer,
+        ))
         .is_err()
     {
         eprintln!("Outbound message queue full: dropping message");
@@ -40,7 +33,9 @@ async fn main() -> tokio::io::Result<()> {
 
     // request all players
     if client::udp_networking::OUTBOUND_MESSAGE_QUEUE
-        .push(ClientToServerMessage::RequestAllPlayers)
+        .push(ClientToServerMessage::new(
+            ClientToServerMessageData::RequestAllPlayers,
+        ))
         .is_err()
     {
         eprintln!("Outbound message queue full: dropping message");
@@ -50,36 +45,13 @@ async fn main() -> tokio::io::Result<()> {
 
     ////////////////    MAIN LOOP    ////////////////
     let mut state = client::state::State::new();
-
-    let mut position_transmit_counter = POSITION_TRANSMIT_FREQUENCY;
+    let mut current_frame: u32 = 0;
 
     while !rl.window_should_close() {
         process_events_and_input(&mut rl, &mut state);
-
-        // state transmitting
-        {
-            position_transmit_counter -= 1;
-            if position_transmit_counter == 0 {
-                position_transmit_counter = POSITION_TRANSMIT_FREQUENCY;
-
-                for player in state.players.values() {
-                    if let Some(client_id) = state.client_id {
-                        if player.owner_client_id == client_id
-                            && client::udp_networking::OUTBOUND_MESSAGE_QUEUE
-                                .push(ClientToServerMessage::EntityPosition {
-                                    entity_id: player.entity_id,
-                                    pos: player.pos,
-                                })
-                                .is_err()
-                        {
-                            eprintln!("Outbound message queue full: dropping message");
-                        }
-                    }
-                }
-            }
-        }
-
         process_message_queue(&mut state).await;
+
+        interval_transmit_position(current_frame, POSITION_TRANSMIT_FREQUENCY, &state);
 
         let dt = rl.get_frame_time();
         state.time_since_last_update += dt;
@@ -87,6 +59,7 @@ async fn main() -> tokio::io::Result<()> {
             state.time_since_last_update -= TIMESTEP;
 
             client::game::step(&mut state);
+            current_frame += 1;
         }
 
         client::graphics::render(&mut rl, &mut rlt, &mut render_texture, &state);
@@ -96,4 +69,26 @@ async fn main() -> tokio::io::Result<()> {
         }
     }
     Ok(())
+}
+
+pub fn interval_transmit_position(current_frame: u32, interval: u32, state: &State) {
+    if current_frame % interval != 0 {
+        return;
+    }
+    for player in state.players.values() {
+        if let Some(client_id) = state.client_id {
+            if player.owner_client_id == client_id
+                && client::udp_networking::OUTBOUND_MESSAGE_QUEUE
+                    .push(ClientToServerMessage::new(
+                        ClientToServerMessageData::EntityPosition {
+                            entity_id: player.entity_id,
+                            pos: player.pos,
+                        },
+                    ))
+                    .is_err()
+            {
+                eprintln!("Outbound message queue full: dropping message");
+            }
+        }
+    }
 }

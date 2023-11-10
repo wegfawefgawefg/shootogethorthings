@@ -12,14 +12,11 @@ use tokio::{
     sync::RwLock,
 };
 
-use super::{
-    client_bookkeeping::{CLIENT_ID_TO_SOCKET_ADDRESS, CLIENT_OUTBOUND_MAILBOXES},
-    settings::SERVER_ADDR,
-};
+use super::client_bookkeeping::{CLIENT_ID_TO_SOCKET_ADDRESS, CLIENT_OUTBOUND_MAILBOXES};
 use crate::{
     common::{
         client_to_server::{ClientToServerMessage, ClientToServerMessageBundle},
-        server_to_client::ServerToClientMessage,
+        network_settings::CLIENT_CONNECT_TO_ADDR,
     },
     server::client_bookkeeping::{add_client, SOCKET_ADDRESS_TO_CLIENT_ID},
 };
@@ -35,7 +32,7 @@ lazy_static! {
 
 pub async fn init() -> tokio::io::Result<()> {
     println!("Initializing socket...");
-    let socket = Arc::new(UdpSocket::bind(SERVER_ADDR).await.unwrap());
+    let socket = Arc::new(UdpSocket::bind(CLIENT_CONNECT_TO_ADDR).await.unwrap());
     println!("Socket Initialized!");
     println!("Spawning rx/tx tasks...");
     tokio::spawn(continuously_read_any_inbound_messages(socket.clone()));
@@ -64,10 +61,7 @@ pub async fn continuously_read_any_inbound_messages(socket: Arc<UdpSocket>) -> i
         let result: Result<ClientToServerMessage, _> = bincode::deserialize(&buffer[..nbytes]);
         match result {
             Ok(result) => {
-                let message_bundle = ClientToServerMessageBundle {
-                    client_id,
-                    message: result,
-                };
+                let message_bundle = ClientToServerMessageBundle::new(client_id, result);
                 if INCOMING_MESSAGE_QUEUE.push(message_bundle).is_err() {
                     eprintln!(
                         "Inbound message queue full: dropping message from {}",
