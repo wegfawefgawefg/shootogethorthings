@@ -12,12 +12,12 @@ use tokio::{
     sync::RwLock,
 };
 
-use super::{
-    client_bookkeeping::{CLIENT_ID_TO_SOCKET_ADDRESS, CLIENT_OUTBOUND_MAILBOXES},
-    settings::SERVER_ADDR,
-};
+use super::client_bookkeeping::{CLIENT_ID_TO_SOCKET_ADDRESS, CLIENT_OUTBOUND_MAILBOXES};
 use crate::{
-    common::client_to_server::{ClientToServerMessage, ClientToServerMessageBundle},
+    common::{
+        client_to_server::{ClientToServerMessage, ClientToServerMessageBundle},
+        network_settings::CLIENT_CONNECT_TO_ADDR,
+    },
     server::client_bookkeeping::{add_client, SOCKET_ADDRESS_TO_CLIENT_ID},
 };
 
@@ -32,7 +32,7 @@ lazy_static! {
 
 pub async fn init() -> tokio::io::Result<()> {
     println!("Initializing socket...");
-    let socket = Arc::new(UdpSocket::bind(SERVER_ADDR).await.unwrap());
+    let socket = Arc::new(UdpSocket::bind(CLIENT_CONNECT_TO_ADDR).await.unwrap());
     println!("Socket Initialized!");
     println!("Spawning rx/tx tasks...");
     tokio::spawn(continuously_read_any_inbound_messages(socket.clone()));
