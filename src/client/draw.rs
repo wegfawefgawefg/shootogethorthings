@@ -14,7 +14,7 @@ pub fn draw(ecs: &World, state: &State, d: &mut RaylibTextureMode<RaylibDrawHand
     draw_players(ecs, state, d);
 }
 
-pub fn draw_players(ecs: &World, state: &State, d: &mut RaylibTextureMode<RaylibDrawHandle>) {
+pub fn draw_players(ecs: &World, _state: &State, d: &mut RaylibTextureMode<RaylibDrawHandle>) {
     for (_, (transform, shape)) in ecs.query::<(&Transform, &Shape)>().iter() {
         d.draw_circle(
             transform.pos.x as i32,

@@ -1,6 +1,5 @@
 use glam::Vec2;
 use hecs::Entity;
-use raylib::prelude::Color;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Transform {

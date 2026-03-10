@@ -35,7 +35,10 @@ async fn main() -> tokio::io::Result<()> {
     // request all players
     if client::udp_networking::OUTBOUND_MESSAGE_QUEUE
         .push(ClientToServerMessage::new(
-            ClientToServerMessageData::RequestAllPlayers,
+            ClientToServerMessageData::RequestAllEntities {
+                from_client_id: client::udp_networking::CLIENT_ID
+                    .load(std::sync::atomic::Ordering::SeqCst),
+            },
         ))
         .is_err()
     {
@@ -73,7 +76,7 @@ async fn main() -> tokio::io::Result<()> {
     Ok(())
 }
 
-pub fn interval_transmit_position(current_frame: u32, interval: u32, state: &State) {
+pub fn interval_transmit_position(_current_frame: u32, _interval: u32, _state: &State) {
     // if current_frame % interval != 0 {
     //     return;
     // }

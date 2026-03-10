@@ -5,7 +5,7 @@ use crate::client::{
     state::State,
 };
 
-pub fn step_physics(ecs: &mut World, state: &mut State) {
+pub fn step_physics(ecs: &mut World, _state: &mut State) {
     for (_, (transform, physics)) in ecs.query::<(&mut Transform, &mut Physics)>().iter() {
         transform.pos += physics.vel;
     }

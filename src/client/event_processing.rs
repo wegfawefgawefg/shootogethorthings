@@ -1,4 +1,4 @@
-use glam::{vec2, Vec2};
+use glam::Vec2;
 use raylib::prelude::*;
 
 use super::state::State;
@@ -11,7 +11,7 @@ pub fn process_events_and_input(rl: &mut RaylibHandle, state: &mut State) {
     }
 
     let mouse_pos_rl = rl.get_mouse_position();
-    let mouse_pos = Vec2::new(mouse_pos_rl.x, mouse_pos_rl.y);
+    let _mouse_pos = Vec2::new(mouse_pos_rl.x, mouse_pos_rl.y);
 
     let mut inputs = PlayingInputs::new();
 
@@ -28,7 +28,7 @@ pub fn process_events_and_input(rl: &mut RaylibHandle, state: &mut State) {
         inputs.right = true;
     }
 
-    if rl.is_mouse_button_down(raylib::consts::MouseButton::MOUSE_LEFT_BUTTON) {
+    if rl.is_mouse_button_down(raylib::consts::MouseButton::MOUSE_BUTTON_LEFT) {
         inputs.shoot = true;
     }
 

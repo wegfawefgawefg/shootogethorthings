@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::game_objects::Player;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ClientToServerMessageBundle {
     // metadata
@@ -57,6 +59,6 @@ pub enum ClientToServerMessageData {
     },
     AllTheEntitiesFor {
         client_id: u32,
-        entities: Vec<crate::common::game_objects::Entity>,
+        entities: Vec<Player>,
     },
 }

@@ -1,9 +1,8 @@
-use glam::Vec2;
 use hecs::World;
 
 use crate::{
     client::{entity_archetypes::spawn_player, udp_networking::CLIENT_ID},
-    common::{game_objects::Player, server_to_client::ServerToClientMessage},
+    common::server_to_client::ServerToClientMessage,
 };
 
 use super::{state::State, udp_networking::INCOMING_MESSAGE_QUEUE};
@@ -34,12 +33,15 @@ pub async fn process_message_queue(ecs: &mut World, state: &mut State) {
                 spawn_player(ecs, state, owner_client_id);
                 println!("player spawned {}", entity_id);
             }
-            ServerToClientMessage::EntityPosition { entity_id, pos } => {
+            ServerToClientMessage::EntityPosition {
+                entity_id: _entity_id,
+                pos: _pos,
+            } => {
                 // if let Some(player) = state.players.get_mut(&entity_id) {
                 //     player.pos = pos;
                 // }
             }
-            ServerToClientMessage::AllPlayers { players } => {
+            ServerToClientMessage::AllPlayers { players: _players } => {
                 // for player in players {
                 //     state.players.insert(
                 //         player.entity_id,
@@ -53,8 +55,9 @@ pub async fn process_message_queue(ecs: &mut World, state: &mut State) {
                 // }
             }
             ServerToClientMessage::RequestAllEntitiesFor { for_client_id } => {
-                let mut entities = Vec::new();
+                let entities = Vec::<crate::common::game_objects::Player>::new();
                 // put every entity into entities
+                let _ = (for_client_id, entities);
             }
         }
     }

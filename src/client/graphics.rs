@@ -13,7 +13,7 @@ pub const WINDOW_DIMS: UVec2 = UVec2::new(480, 320);
 pub const FULLSCREEN: bool = false;
 
 pub fn init_graphics() -> (RaylibHandle, RaylibThread, RenderTexture2D) {
-    let (mut rl, rlt) = raylib::init().title("raylib-rs-lowres-template").build();
+    let (mut rl, rlt) = raylib::init().title("shootogethorthings").build();
     unsafe {
         SetTraceLogLevel(TraceLogLevel::LOG_WARNING as i32);
     }
@@ -41,7 +41,7 @@ pub fn init_graphics() -> (RaylibHandle, RaylibThread, RenderTexture2D) {
 }
 
 pub fn center_window(rl: &mut raylib::RaylibHandle) {
-    let monitor = get_current_monitor();
+    let monitor = 0;
     let screen_dims = IVec2::new(get_monitor_width(monitor), get_monitor_height(monitor));
     println!("screen dims: {:?}", screen_dims);
     let screen_center = screen_dims / 2;
@@ -49,7 +49,7 @@ pub fn center_window(rl: &mut raylib::RaylibHandle) {
 
     let offset = IVec2::new(
         screen_center.x - window_center.x,
-        screen_center.y + window_center.y,
+        screen_center.y - window_center.y,
     );
     rl.set_window_position(offset.x, offset.y);
     rl.set_target_fps(144);

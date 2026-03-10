@@ -1,7 +1,5 @@
 use glam::Vec2;
-use hecs::{Entity, World};
-
-use raylib::prelude::Color;
+use hecs::World;
 
 use super::{
     components::{Health, InputControlled, OwnedByClient, Physics, Player, Shape, Transform},
@@ -11,7 +9,7 @@ use super::{
 };
 
 pub const PLAYER_SHAPE: Vec2 = Vec2::new(16.0, 16.0);
-pub fn spawn_player(ecs: &mut World, state: &mut State, owner_client_id: u32) {
+pub fn spawn_player(ecs: &mut World, _state: &mut State, owner_client_id: u32) {
     let player_entity = ecs.spawn((
         Player,
         Transform {

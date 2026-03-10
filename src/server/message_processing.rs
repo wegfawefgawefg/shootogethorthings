@@ -1,5 +1,3 @@
-use glam::Vec2;
-
 use crate::{
     common::{
         client_to_server::ClientToServerMessageData, game_objects::Player,
@@ -77,8 +75,9 @@ pub async fn process_message_queue(state: &mut State) {
                 let outbound_message = ServerToClientMessage::EntityPosition { entity_id, pos };
                 broadcast_to_all_except(client_id, outbound_message).await;
             }
-            ClientToServerMessageData::RequestAllEntities => {
+            ClientToServerMessageData::RequestAllEntities { from_client_id } => {
                 println!("{} requested full ecs state", client_id);
+                let _ = from_client_id;
 
                 // see if theres any other players to request world state from,
                 {
@@ -105,6 +104,10 @@ pub async fn process_message_queue(state: &mut State) {
                     }
                 }
             }
+            ClientToServerMessageData::AllTheEntitiesFor {
+                client_id: _for_client_id,
+                entities: _entities,
+            } => {}
         }
     }
 }
